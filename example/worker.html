@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    web worker
+</body>
+<script>
+    var worker = new Worker('worker.js');
+    var messageStart = {
+        cmd:"start",
+        msg: 'hello worker 我来自主线程!'
+    };
+    var messageStop = {
+        cmd:"stop",
+        msg: '我停止了!'
+    };
+    // 可以是各种数据类型，包括二进制数据。
+    worker.postMessage(messageStart);
+    worker.onmessage = function (e) {
+        var data = e.data;
+        console.log("%c from child thread %c"+data,"color:red","color:black");
+        worker.postMessage(messageStop);
+
+       
+    }
+    worker.addEventListener('error', function (event) {
+        console.log("error")
+    });
+
+// 主线程关闭线程
+// worker.terminate();
+</script>
+
+</html>
