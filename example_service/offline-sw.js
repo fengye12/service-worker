@@ -1,37 +1,68 @@
-
-  if ('serviceWorker' in navigator && navigator.onLine) {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-      console.log('ServiceWorker registration successful with scope: ',    registration.scope);
-    }).catch(function(err) {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-
-  // var currentPath = window.location.pathname;
-  // var cacheButton = document.querySelector('.offline-btn');
-  // var imageArray = document.querySelectorAll('img');
-  // // Event listener
-  // if(cacheButton) {
-  //   cacheButton.addEventListener('click', function(event) {
-  //     event.preventDefault();
-  //     // Build an array of the page-specific resources.
-  //     var pageResources = [currentPath];
-  //     for (i = 0; i < imageArray.length; i++) {
-  //       pageResources.push(imageArray[i].src);
-  //     }
-  //     // Open the unique cache for this URL.
-  //     caches.open('offline-' + currentPath).then(function(cache) {
-  //       var updateCache = cache.addAll(pageResources);
-  //       // Update UI to indicate success.
-  //       updateCache.then(function() {
-  //         console.log('Article is now available offline.');
-  //         cacheButton.innerHTML = "页面html以及图片缓存成功了哦☺";
-  //       });
-  //       // Catch any errors and report.
-  //       updateCache.catch(function (error) {
-  //         console.log('Article could not be saved offline.');
-  //         cacheButton.innerHTML = "缓存失败☹";
-  //       });
-  //     });
-  //   });
-  // }
+// 注册 serviceWorker
+var registe=null;
+function registerServiceWorker () {
+  return navigator.serviceWorker
+    .register('/sw.js')
+    .then(registration => {
+      alert('success registe serviceworker');
+      registe=registration;
+      return registration;
+    })
+    .catch(err => console.error('Unable to register service worker.', err));
 }
+
+// 注册后显示通知
+function execute () {
+  registerServiceWorker().then(registration => {
+    // 延缓一下，可能sw还没激活
+    setTimeout(function () {
+      registration.showNotification && registration.showNotification('来自coral的消息推送了');
+    }, 1000)
+    update();
+  });
+}
+
+window.addEventListener('load', function () {
+  // 测试兼容性
+  // 支持 serviceWorker
+  if (!('serviceWorker' in navigator)) {
+    alert('no serviceWorker');
+    return;
+  }
+  // 支持 push API
+  if (!('PushManager' in window)) {
+    alert('no PushManager');
+    return;
+  }
+
+  // 获取通知权限
+  let promiseChain = new Promise((resolve, reject) => {
+    // 允许通知提示
+    return Notification.requestPermission(result => resolve(result));
+  }).then(result => {
+    if (result === 'granted') {
+      // 有权限就直接执行，弹出通知
+      execute();
+    } else {
+      alert('no permission');
+    }
+  });
+});
+
+function update () {
+  $('body').on('click', '#btnUpdate', function () {
+    registe.update().then(() => alert('update'));
+  })
+}
+
+
+$('body').on('click', '#btn', function () {
+  if (savedPrompt) {
+    // 异步触发横幅显示，弹出选择框，代替浏览器默认动作
+    savedPrompt.prompt();
+    // 接收选择结果
+    savedPrompt.userChoice.then(result => {
+      console.log(result);
+    });
+  }
+})

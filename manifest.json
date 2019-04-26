@@ -1,0 +1,14 @@
+{
+    "short_name": "coral pwa",
+    "display": "standalone",
+    "start_url": "/example_service/test.html",
+    "theme_color": "#999",
+    "background_color": "#666",
+    "icons":[
+        {
+            "src":"/pwa-icon.png",
+            "sizes":"144x144",
+            "type":"image/png"
+        }
+    ]
+}
